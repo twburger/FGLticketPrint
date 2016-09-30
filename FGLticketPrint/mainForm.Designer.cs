@@ -33,6 +33,8 @@ namespace FGLticketPrint
             this.FGLcodeTextBox = new System.Windows.Forms.TextBox();
             this.MainFormMenuStrip = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.selectFGLCodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.SaveFGLcodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.selectImageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.quitProgramToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.printerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -61,9 +63,10 @@ namespace FGLticketPrint
             this.label10 = new System.Windows.Forms.Label();
             this.FGLimageNameTextBox = new System.Windows.Forms.TextBox();
             this.FGLCodeFileNametextBox = new System.Windows.Forms.TextBox();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.selectFGLCodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.SaveFGLcodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.PrinterSelectionTextBox = new System.Windows.Forms.TextBox();
+            this.PrinterSelectionlabel = new System.Windows.Forms.Label();
+            this.PrinterStatusLabel = new System.Windows.Forms.Label();
+            this.PrinterStatusTextBox = new System.Windows.Forms.TextBox();
             this.MainFormMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.FGLpictureBox)).BeginInit();
             this.SuspendLayout();
@@ -92,7 +95,6 @@ namespace FGLticketPrint
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem1,
             this.selectFGLCodeToolStripMenuItem,
             this.SaveFGLcodeToolStripMenuItem,
             this.selectImageToolStripMenuItem,
@@ -101,17 +103,31 @@ namespace FGLticketPrint
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(44, 24);
             this.fileToolStripMenuItem.Text = "&File";
             // 
+            // selectFGLCodeToolStripMenuItem
+            // 
+            this.selectFGLCodeToolStripMenuItem.Name = "selectFGLCodeToolStripMenuItem";
+            this.selectFGLCodeToolStripMenuItem.Size = new System.Drawing.Size(195, 26);
+            this.selectFGLCodeToolStripMenuItem.Text = "Select  FGL &Code";
+            this.selectFGLCodeToolStripMenuItem.Click += new System.EventHandler(this.selectFGLCodeToolStripMenuItem_Click);
+            // 
+            // SaveFGLcodeToolStripMenuItem
+            // 
+            this.SaveFGLcodeToolStripMenuItem.Name = "SaveFGLcodeToolStripMenuItem";
+            this.SaveFGLcodeToolStripMenuItem.Size = new System.Drawing.Size(195, 26);
+            this.SaveFGLcodeToolStripMenuItem.Text = "&Save FGL Code";
+            this.SaveFGLcodeToolStripMenuItem.Click += new System.EventHandler(this.SaveFGLcodeToolStripMenuItem_Click);
+            // 
             // selectImageToolStripMenuItem
             // 
             this.selectImageToolStripMenuItem.Name = "selectImageToolStripMenuItem";
-            this.selectImageToolStripMenuItem.Size = new System.Drawing.Size(217, 26);
+            this.selectImageToolStripMenuItem.Size = new System.Drawing.Size(195, 26);
             this.selectImageToolStripMenuItem.Text = "Select &Image";
             this.selectImageToolStripMenuItem.Click += new System.EventHandler(this.selectImageToolStripMenuItem_Click);
             // 
             // quitProgramToolStripMenuItem
             // 
             this.quitProgramToolStripMenuItem.Name = "quitProgramToolStripMenuItem";
-            this.quitProgramToolStripMenuItem.Size = new System.Drawing.Size(217, 26);
+            this.quitProgramToolStripMenuItem.Size = new System.Drawing.Size(195, 26);
             this.quitProgramToolStripMenuItem.Text = "&Quit Program";
             this.quitProgramToolStripMenuItem.Click += new System.EventHandler(this.quitProgramToolStripMenuItem_Click);
             // 
@@ -128,7 +144,7 @@ namespace FGLticketPrint
             this.selectPrinterToolStripComboBox.DropDownWidth = 264;
             this.selectPrinterToolStripComboBox.Name = "selectPrinterToolStripComboBox";
             this.selectPrinterToolStripComboBox.Size = new System.Drawing.Size(121, 28);
-            this.selectPrinterToolStripComboBox.Click += new System.EventHandler(this.selectPrinterToolStripMenuItem_Click);
+            this.selectPrinterToolStripComboBox.SelectedIndexChanged += new System.EventHandler(this.selectPrinterToolStripComboBox_SelectedIndexChanged);
             // 
             // FGLpictureBox
             // 
@@ -167,7 +183,7 @@ namespace FGLticketPrint
             this.TicketNumberStart_textBox.TabStop = false;
             this.TicketNumberStart_textBox.Text = "0";
             this.TicketNumberStart_textBox.WordWrap = false;
-            this.TicketNumberStart_textBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TicketNumberStart_textBox_KeyPress);
+            this.TicketNumberStart_textBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.IsDigit_KeyPress);
             // 
             // TicketNumberEnd_textBox
             // 
@@ -179,7 +195,7 @@ namespace FGLticketPrint
             this.TicketNumberEnd_textBox.TabStop = false;
             this.TicketNumberEnd_textBox.Text = "0";
             this.TicketNumberEnd_textBox.WordWrap = false;
-            this.TicketNumberEnd_textBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TicketNumberEnd_textBox_KeyPress);
+            this.TicketNumberEnd_textBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.IsDigit_KeyPress);
             // 
             // label1
             // 
@@ -254,7 +270,7 @@ namespace FGLticketPrint
             this.Count1End_textBox.TabStop = false;
             this.Count1End_textBox.Text = "0";
             this.Count1End_textBox.WordWrap = false;
-            this.Count1End_textBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Count1End_textBox_KeyPress);
+            this.Count1End_textBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.IsDigit_KeyPress);
             // 
             // Count1Start_textBox
             // 
@@ -266,7 +282,7 @@ namespace FGLticketPrint
             this.Count1Start_textBox.TabStop = false;
             this.Count1Start_textBox.Text = "0";
             this.Count1Start_textBox.WordWrap = false;
-            this.Count1Start_textBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Count1Start_textBox_KeyPress);
+            this.Count1Start_textBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.IsDigit_KeyPress);
             // 
             // label8
             // 
@@ -287,7 +303,7 @@ namespace FGLticketPrint
             this.Count2End_textBox.TabStop = false;
             this.Count2End_textBox.Text = "0";
             this.Count2End_textBox.WordWrap = false;
-            this.Count2End_textBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Count2End_textBox_KeyPress);
+            this.Count2End_textBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.IsDigit_KeyPress);
             // 
             // Count2Start_textBox
             // 
@@ -299,7 +315,7 @@ namespace FGLticketPrint
             this.Count2Start_textBox.TabStop = false;
             this.Count2Start_textBox.Text = "0";
             this.Count2Start_textBox.WordWrap = false;
-            this.Count2Start_textBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Count2Start_textBox_KeyPress);
+            this.Count2Start_textBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.IsDigit_KeyPress);
             // 
             // label9
             // 
@@ -320,7 +336,7 @@ namespace FGLticketPrint
             this.Count3End_textBox.TabStop = false;
             this.Count3End_textBox.Text = "0";
             this.Count3End_textBox.WordWrap = false;
-            this.Count3End_textBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Count3End_textBox_KeyPress);
+            this.Count3End_textBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.IsDigit_KeyPress);
             // 
             // Count3Start_textBox
             // 
@@ -332,7 +348,7 @@ namespace FGLticketPrint
             this.Count3Start_textBox.TabStop = false;
             this.Count3Start_textBox.Text = "0";
             this.Count3Start_textBox.WordWrap = false;
-            this.Count3Start_textBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Count3Start_textBox_KeyPress);
+            this.Count3Start_textBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.IsDigit_KeyPress);
             // 
             // textBox8
             // 
@@ -369,31 +385,49 @@ namespace FGLticketPrint
             this.FGLCodeFileNametextBox.Size = new System.Drawing.Size(395, 22);
             this.FGLCodeFileNametextBox.TabIndex = 24;
             // 
-            // toolStripMenuItem1
+            // PrinterSelectionTextBox
             // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(217, 26);
-            this.toolStripMenuItem1.Text = "toolStripMenuItem1";
+            this.PrinterSelectionTextBox.Location = new System.Drawing.Point(296, 2);
+            this.PrinterSelectionTextBox.Name = "PrinterSelectionTextBox";
+            this.PrinterSelectionTextBox.ReadOnly = true;
+            this.PrinterSelectionTextBox.Size = new System.Drawing.Size(279, 22);
+            this.PrinterSelectionTextBox.TabIndex = 25;
             // 
-            // selectFGLCodeToolStripMenuItem
+            // PrinterSelectionlabel
             // 
-            this.selectFGLCodeToolStripMenuItem.Name = "selectFGLCodeToolStripMenuItem";
-            this.selectFGLCodeToolStripMenuItem.Size = new System.Drawing.Size(217, 26);
-            this.selectFGLCodeToolStripMenuItem.Text = "Select  FGL &Code";
-            this.selectFGLCodeToolStripMenuItem.Click += new System.EventHandler(this.selectFGLCodeToolStripMenuItem_Click);
+            this.PrinterSelectionlabel.AutoSize = true;
+            this.PrinterSelectionlabel.Location = new System.Drawing.Point(187, 5);
+            this.PrinterSelectionlabel.Name = "PrinterSelectionlabel";
+            this.PrinterSelectionlabel.Size = new System.Drawing.Size(109, 17);
+            this.PrinterSelectionlabel.TabIndex = 26;
+            this.PrinterSelectionlabel.Text = "Printer Selected";
             // 
-            // SaveFGLcodeToolStripMenuItem
+            // PrinterStatusLabel
             // 
-            this.SaveFGLcodeToolStripMenuItem.Name = "SaveFGLcodeToolStripMenuItem";
-            this.SaveFGLcodeToolStripMenuItem.Size = new System.Drawing.Size(217, 26);
-            this.SaveFGLcodeToolStripMenuItem.Text = "&Save FGL Code";
-            this.SaveFGLcodeToolStripMenuItem.Click += new System.EventHandler(this.SaveFGLcodeToolStripMenuItem_Click);
+            this.PrinterStatusLabel.AutoSize = true;
+            this.PrinterStatusLabel.Location = new System.Drawing.Point(581, 5);
+            this.PrinterStatusLabel.Name = "PrinterStatusLabel";
+            this.PrinterStatusLabel.Size = new System.Drawing.Size(94, 17);
+            this.PrinterStatusLabel.TabIndex = 28;
+            this.PrinterStatusLabel.Text = "Printer Status";
+            // 
+            // PrinterStatusTextBox
+            // 
+            this.PrinterStatusTextBox.Location = new System.Drawing.Point(675, 2);
+            this.PrinterStatusTextBox.Name = "PrinterStatusTextBox";
+            this.PrinterStatusTextBox.ReadOnly = true;
+            this.PrinterStatusTextBox.Size = new System.Drawing.Size(514, 22);
+            this.PrinterStatusTextBox.TabIndex = 27;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1196, 558);
+            this.Controls.Add(this.PrinterStatusLabel);
+            this.Controls.Add(this.PrinterStatusTextBox);
+            this.Controls.Add(this.PrinterSelectionlabel);
+            this.Controls.Add(this.PrinterSelectionTextBox);
             this.Controls.Add(this.FGLCodeFileNametextBox);
             this.Controls.Add(this.FGLimageNameTextBox);
             this.Controls.Add(this.label10);
@@ -464,9 +498,12 @@ namespace FGLticketPrint
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.TextBox FGLimageNameTextBox;
         private System.Windows.Forms.TextBox FGLCodeFileNametextBox;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem selectFGLCodeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem SaveFGLcodeToolStripMenuItem;
+        private System.Windows.Forms.TextBox PrinterSelectionTextBox;
+        private System.Windows.Forms.Label PrinterSelectionlabel;
+        private System.Windows.Forms.Label PrinterStatusLabel;
+        private System.Windows.Forms.TextBox PrinterStatusTextBox;
     }
 }
 

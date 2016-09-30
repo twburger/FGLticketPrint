@@ -12,6 +12,8 @@ using System.Runtime.InteropServices;
 using System.IO;
 using System.Drawing.Drawing2D;
 using ImageMagick;
+using System.Management;
+
 
 namespace FGLticketPrint
 {
@@ -39,13 +41,105 @@ namespace FGLticketPrint
             Close();
         }
 
-        private void selectPrinterToolStripMenuItem_Click(object sender, EventArgs e)
+        private void selectPrinterToolStripComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             var combo = (ToolStripComboBox)sender;
 
-            string szPrinterSelect = combo.SelectedText;
+            PrinterSelectionTextBox.Text = szPrinterName = (string) combo.SelectedItem;
 
-            szPrinterName = szPrinterSelect;
+            DisplayPrinterStatus(PrinterSelectionTextBox.Text);
+
+            // set the printer status 
+            //PrinterSettings ps = new PrinterSettings();
+            //ps.PrinterName = PrinterSelectionTextBox.Text;
+
+            //bool online = false;
+            //try
+            //{
+            //    PrintDocument printDocument = new PrintDocument();
+            //    printDocument.PrinterSettings.PrinterName = PrinterSelectionTextBox.Text;
+            //    online = printDocument.PrinterSettings.IsValid;
+            //}
+            //catch
+            //{
+            //    online = false;
+            //}
+
+        }
+
+        // Display the printer status
+        private void DisplayPrinterStatus(string printerName)
+        {
+            // Lookup arrays.
+            string[] PrinterStatuses =
+            {
+                "0 Undefined", "1 Other", "2 Unknown", "3 Idle", "4 Printing", "5 WarmUp",
+                "6 Stopped Printing", "7 Offline"  };
+
+            string[] PrinterStates =
+            {
+                "0 Idle", "1 Paused", "2 Error", "3 Pending Deletion", "4 Paper Jam",
+                "5 Paper Out", "6 Manual Feed", "7 Paper Problem","8 Offline", "9 IO Active", "10 Busy", "11 Printing",
+                "12 Output Bin Full", "13 Not Available", "14 Waiting", "15 Processing", "16 Initialization", "17 Warming Up",
+                "18 Toner Low", "19 No Toner", "20 Page Punt", "21 User Intervention Required", "22 Out of Memory",
+                "23 Door Open", "24 Server_Unknown", "25 Power Save"};
+
+            // Get a ManagementObjectSearcher for the printer.
+            string query = "SELECT * FROM Win32_Printer WHERE Name='" + printerName + "'";
+
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher(query);
+
+            // Get the ManagementObjectCollection representing
+            // the result of the WMI query. Loop through its
+            // single item. Display some of that item's properties.
+            foreach (ManagementObject service in searcher.Get())
+            {
+                UInt32 state = (UInt32)service.Properties["PrinterState"].Value;
+                UInt16 status = (UInt16)service.Properties["PrinterStatus"].Value;
+
+                PrinterStatusTextBox.Text = "Status: "+ PrinterStatuses[status] + " State: " + PrinterStates[state];
+
+                /*
+                txtName.Text = service.Properties["Name"].Value.ToString();
+
+                UInt32 state =
+                    (UInt32)service.Properties["PrinterState"].Value;
+                txtState.Text =
+                    PrinterStates[state];
+
+                UInt16 status =
+                    (UInt16)service.Properties["PrinterStatus"].Value;
+                txtStatus.Text = PrinterStatuses[status];
+
+                txtDescription.Text =
+                    GetPropertyValue(service.Properties["Description"]);
+                txtDefault.Text =
+                    GetPropertyValue(service.Properties["Default"]);
+                txtHorRes.Text =
+                    GetPropertyValue(service.Properties["HorizontalResolution"]);
+                txtVertRes.Text =
+                    GetPropertyValue(service.Properties["VerticalResolution"]);
+                txtPort.Text =
+                    GetPropertyValue(service.Properties["PortName"]);
+
+                lstPaperSizes.Items.Clear();
+                string[] paper_sizes =
+                    (string[])service.Properties["PrinterPaperNames"].Value;
+                foreach (string paper_size in paper_sizes)
+                {
+                    lstPaperSizes.Items.Add(paper_size);
+                }
+
+                // List the available properties.
+                foreach (PropertyData data in service.Properties)
+                {
+                    string txt = data.Name;
+                    if (data.Value != null)
+                        txt += ": " + data.Value.ToString();
+                    Console.WriteLine(txt);
+                }
+                */
+            }
         }
 
         private void selectImageToolStripMenuItem_Click(object sender, EventArgs e)
@@ -66,49 +160,59 @@ namespace FGLticketPrint
             // Process input if the user clicked OK.
             if (userClicked == DialogResult.OK)
             {
+                Image FGLimage;
+
                 // Save the image file name
                 szImageFileName = openImageFileDialog.FileName;
 
-                if( 0 == string.Compare( ".pcx", Path.GetExtension(szImageFileName), true))
+                // read a PCX and convert it to BMP, save it and load the bitmap
+                if (0 == string.Compare(".pcx", Path.GetExtension(szImageFileName), true))
                 {
                     // use MagickImage library to read a PCX file
+                    // https://magick.codeplex.com/wikipage?title=Convert%20image
+
                     using (MagickImage image = new MagickImage(szImageFileName))
                     {
+                        FGLimage = image.ToBitmap();  // Copy the bitmap to be displayed
+
                         // write it back as a BMP file
-                        szImageFileName = szImageFileName + ".BMP";
+                        string szfilename = szImageFileName + ".BMP";
 
                         // Do not overwrite an existing file
-                        if( ! File.Exists(szImageFileName))
-                            image.Write(szImageFileName);
+                        if (!File.Exists(szfilename))
+                            image.Write(szfilename);
                     }
                 }
+                else
+                {
+                    // Place image in the pictureBox
+                    //Image FGLimage = Image.FromFile(szImageName);
+                    //Image FGLimage;
+                    FileStream myStream = new FileStream(szImageFileName, FileMode.Open);
 
-                // Place image in the pictureBox
-                //Image FGLimage = Image.FromFile(szImageName);
-                Image FGLimage;
-                FileStream myStream = new FileStream(szImageFileName, FileMode.Open);
-
-                try
-                {
-                    FGLimage = Image.FromStream(myStream);
-                    //Size s = FGLimage.Size;
-                }
-                catch
-                {
-                    // display error dialog
-                    MessageBox.Show("The file selected could not be opened or processed",
-                        "Image Error: " + FGL_utility.EllipsisString(szImageFileName), MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    szImageFileName = string.Empty;
-                    return;
-                }
-                finally
-                {
-                    myStream.Close();
-                    myStream.Dispose();
+                    try
+                    {
+                        FGLimage = Image.FromStream(myStream);
+                        //Size s = FGLimage.Size;
+                    }
+                    catch
+                    {
+                        // display error dialog
+                        MessageBox.Show("The file selected could not be opened or processed",
+                            "Image Error: " + FGL_utility.EllipsisString(szImageFileName), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        szImageFileName = string.Empty;
+                        return;
+                    }
+                    finally
+                    {
+                        myStream.Close();
+                        myStream.Dispose();
+                    }
                 }
 
                 FGLimageNameTextBox.Text = FGL_utility.EllipsisString(szImageFileName);
 
+                // resize the bitmap to fit the picturebox display
                 Image newImage = new Bitmap(FGLpictureBox.Width, FGLpictureBox.Height);
                 Graphics graphics = Graphics.FromImage(newImage);
                 //graphics.SmoothingMode = SmoothingMode.AntiAlias;
@@ -119,10 +223,9 @@ namespace FGLticketPrint
 
                 FGLpictureBox.Image = newImage;
 
-                //FGLpictureBox.Image = FGLimage;
-
-                // release iamge resources
-                //FGLimage.Dispose();
+                // release image resources
+                //newImage.Dispose();
+                FGLimage.Dispose();
             }
         }
 
@@ -166,10 +269,6 @@ namespace FGLticketPrint
                 }
             }
         }
-        private void TicketNumberStart_textBox_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            IsDigit_KeyPress(sender, e);
-        }
 
         /// <summary>
         /// Tells Windows that we handled a non-numeric key so it will ignore anything not
@@ -185,45 +284,10 @@ namespace FGLticketPrint
             }
         }
 
-        private void TicketNumberEnd_textBox_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            IsDigit_KeyPress(sender, e);
-        }
-
-        private void Count1Start_textBox_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            IsDigit_KeyPress(sender, e);
-        }
-
-        private void Count1End_textBox_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            IsDigit_KeyPress(sender, e);
-        }
-
-        private void Count2Start_textBox_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            IsDigit_KeyPress(sender, e);
-        }
-
-        private void Count2End_textBox_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            IsDigit_KeyPress(sender, e);
-        }
-
-        private void Count3Start_textBox_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            IsDigit_KeyPress(sender, e);
-        }
-
-        private void Count3End_textBox_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            IsDigit_KeyPress(sender, e);
-        }
-
         private void SaveFGLcodeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // get the path to the code text file and write the FGL file text to it.
-            //Stream myStream;
+            
             SaveFileDialog FGLcodeSaveFileDialog = new SaveFileDialog();
 
             FGLcodeSaveFileDialog.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
@@ -255,7 +319,6 @@ namespace FGLticketPrint
             }
         }
     }
-
 
     public class RawPrinterHelper
     {
